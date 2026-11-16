@@ -1,0 +1,21 @@
+# FireWatch backend (Spring Boot) - yeu cau de chay
+# Thu vien Java do Maven tu tai theo pom.xml, KHONG cai bang pip.
+
+## Moi truong
+JDK 21
+Maven 3.9+ (hoac IntelliJ IDEA co san Maven)
+Mosquitto 2.x (broker MQTT, tai khoan firewatch-server)
+PostgreSQL tren Supabase (chay schema.sql truoc, dung Session pooler cong 5432)
+
+## Thu vien (pom.xml)
+spring-boot-starter-parent 4.0.9
+spring-boot-starter-webmvc        # REST API
+spring-boot-starter-security      # CSRF, header bao mat, BCrypt
+spring-boot-starter-data-jpa      # JPA/Hibernate
+org.postgresql:postgresql         # driver PostgreSQL
+org.eclipse.paho.client.mqttv3 1.2.5   # MQTT client
+
+## Chay
+# 1. Copy .env.example thanh .env va dien gia tri
+# 2. Trong thu muc backend:  mvn spring-boot:run
+# 3. Mo http://127.0.0.1:8080  (frontend lay tu ../frontend)
