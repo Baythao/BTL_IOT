@@ -1,4 +1,10 @@
-> **Bản cập nhật Email + PostgreSQL:** xem [HUONG_DAN_EMAIL_POSTGRESQL.md](HUONG_DAN_EMAIL_POSTGRESQL.md). Phần hướng dẫn Push/SMS bên dưới là tài liệu cũ, không còn áp dụng cho bản code này.
+## Thành viên nhóm
+
+| STT | Họ và tên        | Mã sinh viên |
+|:---:|------------------|:------------:|
+| 1   | Thào A Bảy       | B22DCCN072   |
+| 2   | Trịnh Quang Anh  | B23DCCN055   |
+| 3   | Hoàng Khải Hưng  | B23DCCN365   |
 
 # Hướng dẫn FireWatch IoT tổng hợp
 
