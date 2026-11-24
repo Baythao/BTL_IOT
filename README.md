@@ -1,4 +1,4 @@
-# Hệ Thống cảnh báo cháy, rò rỉ khí gas trong nhà
+# HỆ THỐNG CẢNH BÁO CHÁY, RÒ RỈ KHÍ GAS
 ## Thành viên nhóm
 
 | STT | Họ và tên        | Mã sinh viên |
