@@ -278,8 +278,7 @@ Không mở các quy tắc này trên Public network, không chuyển tiếp c�
 
 ## 10. Cảnh báo Email và PostgreSQL
 
-Phiên bản này gửi email SMTP thay cho Pushover/Twilio. Có thể dùng PostgreSQL thật cho cả collector và dashboard. Cách cấu hình và chạy từng bước: [HUONG_DAN_EMAIL_POSTGRESQL.md](HUONG_DAN_EMAIL_POSTGRESQL.md).
-
+Phiên bản này gửi email SMTP. Có thể dùng PostgreSQL thật cho cả collector và dashboard. 
 
 ## 11. Kiểm tra kết nối theo thứ tự
 
