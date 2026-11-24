@@ -1,3 +1,4 @@
+# Hệ Thống cảnh báo cháy, rò rỉ khí gas trong nhà
 ## Thành viên nhóm
 
 | STT | Họ và tên        | Mã sinh viên |
@@ -6,9 +7,9 @@
 | 2   | Trịnh Quang Anh  | B23DCCN055   |
 | 3   | Hoàng Khải Hưng  | B23DCCN365   |
 
-# Hướng dẫn FireWatch IoT tổng hợp
+## Hướng dẫn FireWatch IoT tổng hợp
 
-Tài liệu này gộp hướng dẫn cài dashboard web, Mosquitto, ESP32 và bộ nhận cảnh báo. Làm lần lượt theo các bước dưới đây. Bộ này là **mô hình học tập**, không phải hệ thống báo cháy được chứng nhận và không thay thế thiết bị PCCC hoặc hệ thống thoát nạn chuyên dụng.
+Tài liệu này gộp hướng dẫn cài dashboard web, Mosquitto, ESP32 và bộ nhận cảnh báo. Làm lần lượt theo các bước dưới đây. 
 
 ## 1. Tải và mở thư mục dự án
 
