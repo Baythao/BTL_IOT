@@ -306,19 +306,17 @@ Quạt/bơm/còi hiển thị bật là lệnh đầu ra của ESP32, không ch�
 | Lệnh `python.exe` không tìm thấy | Đang ở sai thư mục. Vào `server`, kiểm tra `Test-Path .\.venv\Scripts\python.exe`; nếu False thì tạo venv và cài requirements theo Bước 2. |
 | Cửa sổ PowerShell bị đóng | Tiến trình tương ứng đã dừng; mở cửa sổ mới, vào đúng thư mục và chạy lại lệnh của tiến trình đó. |
 
-## 13. Những file nào cần giữ
+## 13. Những file CODE chính
 
-Giữ các file chương trình và mẫu cấu hình sau khi tải dự án:
+Các file chương trình và mẫu cấu hình sau khi tải dự án:
 
 - `esp32_mqtt/esp32_mqtt.ino`, `esp32_mqtt/types.h`, `esp32_mqtt/config.example.h` — firmware và mẫu cấu hình.
 - `mosquitto/firewatch.conf`, `mosquitto/aclfile.example` — broker và quyền topic mẫu.
 - Thư mục `server/` gồm `web_app.py`, `notify_server.py`, `device_store.py`, `requirements.txt`, `setup_web.py`, `templates/`, `static/` — ứng dụng máy chủ.
 - `README.md` và tài liệu hướng dẫn — tài liệu dự án.
 
-`server/test_web.py` và `server/test_notify_server.py` chỉ phục vụ kiểm thử tự động; không cần để khởi động hệ thống. Có thể giữ lại để kiểm tra khi sửa code. Không xóa nhầm file chương trình, cấu hình hoặc thư viện cần thiết.
+`server/test_web.py` và `server/test_notify_server.py` chỉ phục vụ kiểm thử tự động; không cần để khởi động hệ thống. 
 
-Các file riêng trên mỗi máy như `server/.env`, `esp32_mqtt/config.h`, `server/alerts.sqlite3` không nên chia sẻ công khai. `.env` chứa bí mật và cấu hình web; `config.h` chứa Wi-Fi/MQTT; database chứa tài khoản và lịch sử. Không xóa database khi collector hoặc web đang chạy.
+Các file riêng trên mỗi máy như `server/.env`, `esp32_mqtt/config.h`, `server/alerts.sqlite3` không được chia sẻ công khai. `.env` chứa bí mật và cấu hình web; `config.h` chứa Wi-Fi/MQTT.
 
-## 14. Giới hạn an toàn
 
-Mô hình dùng Wi-Fi, laptop, cảm biến phổ thông và thiết bị đóng cắt thử nghiệm. Mất điện, mất Wi-Fi, lỗi cảm biến, sai ngưỡng, relay/MOSFET hỏng hoặc cơ cấu bị kẹt đều có thể làm cảnh báo/điều khiển không như mong muốn. Không dùng nó làm hệ thống báo cháy cho nhà cao tầng, không dùng quạt thường trong môi trường khí dễ cháy và không phụ thuộc servo để mở lối thoát hiểm. Công trình thật cần thiết kế, thiết bị, nguồn dự phòng, kiểm định và lắp đặt theo quy chuẩn PCCC bởi đơn vị chuyên môn.
