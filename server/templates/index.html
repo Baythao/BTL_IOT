@@ -1,0 +1,493 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#122b31">
+  <title>FireWatch · Giám sát IoT</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="/static/app.css">
+  <script src="/static/app.js?v=2" defer></script>
+</head>
+<body>
+  <div id="toast" class="toast" role="status" hidden></div>
+
+  <section id="login-screen" class="login-screen">
+    <div class="login-story">
+      <div class="brand"><span class="brand-mark">F</span> FireWatch</div>
+      <span class="eyebrow">GIÁM SÁT IOT / MQTT</span>
+      <h1>Mọi tín hiệu.<br>Một góc nhìn.</h1>
+      <p>Theo dõi cảm biến, ngưỡng cảnh báo và thiết bị của bạn trên giao diện web và nhận cảnh báo qua email.</p>
+
+      <div class="story-visual">
+        <div class="orbit"></div>
+        <span class="central-node">ESP32</span>
+        <span class="sensor-node">Cảm biến</span>
+        <span class="cloud-node">MQTT</span>
+      </div>
+
+      <div class="story-footer">
+        <span class="dot"></span> Mô hình giám sát và cảnh báo
+      </div>
+    </div>
+
+    <div class="login-panel">
+      <form id="login-form" class="login-card">
+        <span class="eyebrow">CHÀO MỪNG TRỞ LẠI</span>
+        <h2>Đăng nhập</h2>
+        <p class="muted">Sử dụng tài khoản được Admin cấp.</p>
+
+        <label>
+          Tên đăng nhập
+          <input
+            name="username"
+            autocomplete="username"
+            required
+            maxlength="32"
+            placeholder="Nhập tên đăng nhập"
+          >
+        </label>
+
+        <label>
+          Mật khẩu
+          <input
+            name="password"
+            type="password"
+            autocomplete="current-password"
+            required
+            maxlength="128"
+            placeholder="Nhập mật khẩu"
+          >
+        </label>
+
+        <p id="login-error" class="error" role="alert"></p>
+        <button class="primary wide" type="submit">
+          Đăng nhập <span>→</span>
+        </button>
+
+        <p class="footnote">
+          Quyền truy cập do Admin quản lý.<br>
+          Liên hệ Admin nếu bạn cần đặt lại mật khẩu.
+        </p>
+      </form>
+    </div>
+  </section>
+
+  <div id="app-screen" class="app-shell" hidden>
+    <aside class="sidebar">
+      <div class="brand"><span class="brand-mark">F</span> FireWatch</div>
+      <p class="nav-label">KHÔNG GIAN GIÁM SÁT</p>
+
+      <nav id="nav">
+        <button data-page="overview" data-permission="view_status">
+          <span>◫</span>Tổng quan
+        </button>
+        <button data-page="thresholds" data-permission="view_thresholds">
+          <span>≋</span>Ngưỡng cảnh báo
+        </button>
+        <button data-page="history" data-permission="view_history">
+          <span>◷</span>Lịch sử hoạt động
+        </button>
+        <button data-page="users" data-admin="true">
+          <span>♙</span>Người dùng
+        </button>
+        <button data-page="audit" data-admin="true">
+          <span>☷</span>Nhật ký quản trị
+        </button>
+        <button data-page="account">
+          <span>⚙</span>Tài khoản
+        </button>
+      </nav>
+
+      <div class="sidebar-bottom">
+        <span class="mode-label">MÔ HÌNH HỌC TẬP</span>
+        <p>ESP32 · MQTT · Web</p>
+        <small>Điều khiển tại chỗ hoạt động độc lập với giao diện web.</small>
+      </div>
+    </aside>
+
+    <main>
+      <header class="topbar">
+        <span class="breadcrumb">
+          HỆ THỐNG / <b id="page-crumb">Tổng quan</b>
+        </span>
+
+        <div class="profile">
+          <span id="avatar" class="avatar">U</span>
+          <div>
+            <strong id="profile-name"></strong>
+            <small id="profile-role"></small>
+          </div>
+          <button id="logout" class="icon-button" title="Đăng xuất">↪</button>
+        </div>
+      </header>
+
+      <div class="content">
+        <div class="page-heading">
+          <div>
+            <span class="eyebrow" id="device-label">ESP32</span>
+            <h1 id="page-title">Tổng quan hệ thống</h1>
+            <p id="page-description" class="muted"></p>
+          </div>
+          <span class="date-label" id="today"></span>
+        </div>
+
+        <div id="force-password" class="notice" hidden>
+          Bạn đang dùng mật khẩu tạm. Hãy đổi mật khẩu để mở các chức năng được cấp quyền.
+        </div>
+
+        <section id="page-overview" class="page" hidden>
+          <div id="connection-bar" class="connection-bar">
+            <span id="connection-badge" class="badge neutral">Đang tải</span>
+            <span id="last-seen">Chưa có dữ liệu</span>
+            <span class="refresh-note">Cập nhật mỗi 2 giây</span>
+          </div>
+
+          <div id="stale-warning" class="notice" hidden>
+            Dữ liệu đã cũ. Các trạng thái bên dưới là lần ghi nhận cuối,
+            chưa thể xác nhận tình trạng hiện tại.
+          </div>
+
+          <div class="stats-grid">
+            <article class="stat-card">
+              <div class="card-top">
+                <span>CẢM BIẾN LỬA</span>
+                <span class="mini-icon fire-icon">♨</span>
+              </div>
+              <strong id="fire-value">—</strong>
+              <p id="fire-detail">Chờ dữ liệu từ ESP32</p>
+            </article>
+
+            <article class="stat-card">
+              <div class="card-top">
+                <span>CẢM BIẾN GAS</span>
+                <span class="mini-icon">≋</span>
+              </div>
+              <strong id="gas-value">—</strong>
+              <p id="gas-detail">Giá trị ADC, không phải ppm</p>
+            </article>
+
+            <article class="stat-card">
+              <div class="card-top">
+                <span>ĐẦU RA ĐANG KÍCH</span>
+                <span class="mini-icon">ϟ</span>
+              </div>
+              <strong id="outputs-value">—</strong>
+              <p>Quạt · bơm · còi</p>
+            </article>
+
+            <article class="stat-card">
+              <div class="card-top">
+                <span>TRẠNG THÁI CỬA</span>
+                <span class="mini-icon">🚪</span>
+              </div>
+              <strong id="servo-value">—</strong>
+              <p>Theo lệnh điều khiển cửa</p>
+            </article>
+          </div>
+
+          <div class="two-columns">
+            <article class="panel">
+              <div class="panel-heading">
+                <div>
+                  <h2>Thiết bị phần cứng</h2>
+                  <p>Trạng thái lệnh ESP32 đang xuất</p>
+                </div>
+                <span class="badge neutral">GPIO</span>
+              </div>
+
+              <div id="hardware-list" class="hardware-list"></div>
+
+              <p class="panel-note">
+                Đây là trạng thái lệnh ESP32 gửi; mô hình chưa có cảm biến
+                phản hồi để xác nhận quạt, bơm hoặc cửa đã chuyển động thực tế.
+              </p>
+            </article>
+
+            <article class="panel">
+              <div class="panel-heading">
+                <div>
+                  <h2>Tín hiệu gas</h2>
+                  <p>Thang ADC 12 bit</p>
+                </div>
+                <span class="badge neutral">MQ-2</span>
+              </div>
+
+              <div class="gas-number">
+                <span id="gas-number">—</span>
+                <small>/ 4095</small>
+              </div>
+
+              <progress id="gas-meter" max="4095" value="0"></progress>
+
+              <div class="scale">
+                <span>0</span>
+                <span>2048</span>
+                <span>4095</span>
+              </div>
+
+              <div id="gas-summary" class="gas-summary">Chưa có mẫu đo.</div>
+
+              <p class="panel-note">
+                Giá trị ADC không phải nồng độ khí. Cảm biến cần ổn định và
+                hiệu chuẩn cho môi trường sử dụng.
+              </p>
+            </article>
+          </div>
+
+          <div class="bottom-note">
+            Mô hình có chu trình lửa tối đa 10 giây. Không thay thế hệ thống báo cháy chuyên dụng.
+          </div>
+        </section>
+
+        <section id="page-thresholds" class="page" hidden>
+          <article class="panel">
+            <div class="panel-heading">
+              <div>
+                <h2>Cấu hình do ESP32 báo về</h2>
+                <p id="threshold-time">Chưa có dữ liệu</p>
+              </div>
+              <span class="badge neutral">Chỉ xem</span>
+            </div>
+            <div id="threshold-content"></div>
+          </article>
+
+          <p class="bottom-note">
+            Ngưỡng không được suy đoán từ máy chủ. Khi thay đổi code trên ESP32,
+            cấu hình mới sẽ xuất hiện sau khi thiết bị gửi dữ liệu.
+          </p>
+        </section>
+
+        <section id="page-history" class="page" hidden>
+          <div class="tabs">
+            <button class="tab active" data-history="events">Cảnh báo</button>
+            <button class="tab" data-history="activities">Thay đổi phần cứng</button>
+          </div>
+
+          <article class="panel">
+            <div class="panel-heading">
+              <div>
+                <h2 id="history-title">Lịch sử cảnh báo</h2>
+                <p>100 bản ghi gần nhất · thời gian máy chủ nhận</p>
+              </div>
+              <button id="refresh-history" class="secondary">Làm mới</button>
+            </div>
+
+            <div id="history-content" class="table-wrap"></div>
+          </article>
+        </section>
+
+        <section id="page-users" class="page" hidden>
+          <article class="panel">
+            <div class="panel-heading">
+              <div>
+                <h2>Quản lý người dùng</h2>
+                <p id="user-count">Tài khoản và quyền truy cập</p>
+              </div>
+              <button id="add-user" class="primary">+ Thêm người dùng</button>
+            </div>
+
+            <div class="search-row">
+              <input
+                id="user-search"
+                type="search"
+                placeholder="Tìm theo tên hoặc tài khoản…"
+                aria-label="Tìm người dùng"
+              >
+            </div>
+
+            <div id="users-content" class="table-wrap"></div>
+          </article>
+        </section>
+
+        <section id="page-audit" class="page" hidden>
+          <article class="panel">
+            <div class="panel-heading">
+              <div>
+                <h2>Nhật ký quản trị</h2>
+                <p>100 thao tác gần nhất</p>
+              </div>
+              <button id="refresh-audit" class="secondary">Làm mới</button>
+            </div>
+
+            <div id="audit-content" class="table-wrap"></div>
+          </article>
+        </section>
+
+        <section id="page-account" class="page" hidden>
+          <div class="two-columns">
+            <article class="panel">
+              <h2>Tài khoản của bạn</h2>
+              <div id="account-summary"></div>
+            </article>
+
+            <article class="panel">
+              <h2>Đổi mật khẩu</h2>
+              <form id="password-form">
+                <label>
+                  Mật khẩu hiện tại
+                  <input
+                    type="password"
+                    name="current"
+                    autocomplete="current-password"
+                    required
+                    maxlength="128"
+                  >
+                </label>
+
+                <label>
+                  Mật khẩu mới
+                  <input
+                    type="password"
+                    name="new"
+                    autocomplete="new-password"
+                    required
+                    minlength="10"
+                    maxlength="128"
+                  >
+                </label>
+
+                <label>
+                  Nhập lại mật khẩu mới
+                  <input
+                    type="password"
+                    name="repeat"
+                    autocomplete="new-password"
+                    required
+                    minlength="10"
+                    maxlength="128"
+                  >
+                </label>
+
+                <p class="muted">
+                  Từ 10 đến 128 ký tự. Các phiên đăng nhập khác sẽ hết hiệu lực.
+                </p>
+                <button class="primary" type="submit">Lưu mật khẩu</button>
+              </form>
+            </article>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <dialog id="user-dialog">
+    <form id="user-form">
+      <div class="dialog-heading">
+        <div>
+          <span class="eyebrow">QUẢN TRỊ</span>
+          <h2 id="user-dialog-title">Thêm người dùng</h2>
+        </div>
+        <button
+          type="button"
+          class="close-dialog icon-button"
+          aria-label="Đóng"
+        >×</button>
+      </div>
+
+      <input name="id" type="hidden">
+
+      <label>
+        Họ tên
+        <input name="full_name" required maxlength="80" autocomplete="off">
+      </label>
+
+      <label>
+        Tên đăng nhập
+        <input
+          name="username"
+          required
+          minlength="3"
+          maxlength="32"
+          pattern="[a-zA-Z0-9_.-]+"
+          autocomplete="off"
+        >
+      </label>
+
+      <label id="temporary-password-label">
+        Mật khẩu tạm
+        <input
+          name="password"
+          type="password"
+          minlength="10"
+          maxlength="128"
+          autocomplete="new-password"
+        >
+      </label>
+
+      <div class="form-row">
+        <label>
+          Vai trò
+          <select name="role">
+            <option value="user">Người dùng</option>
+            <option value="admin">Admin — toàn quyền</option>
+          </select>
+        </label>
+
+        <label>
+          Trạng thái
+          <select name="active">
+            <option value="true">Hoạt động</option>
+            <option value="false">Đã khóa</option>
+          </select>
+        </label>
+      </div>
+
+      <fieldset id="permissions-fieldset">
+        <legend>Quyền được cấp</legend>
+        <label class="check">
+          <input type="checkbox" name="view_status">
+          Xem cảm biến và phần cứng
+        </label>
+        <label class="check">
+          <input type="checkbox" name="view_thresholds">
+          Xem ngưỡng cảnh báo
+        </label>
+        <label class="check">
+          <input type="checkbox" name="view_history">
+          Xem lịch sử hoạt động
+        </label>
+      </fieldset>
+
+      <p id="user-form-note" class="muted">
+        Người dùng mới phải đổi mật khẩu khi đăng nhập lần đầu.
+      </p>
+      <p class="error" id="user-form-error" role="alert"></p>
+
+      <div class="dialog-actions">
+        <button type="button" class="secondary close-dialog">Hủy</button>
+        <button type="submit" class="primary">Lưu tài khoản</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="reset-dialog">
+    <form id="reset-form">
+      <h2>Đặt lại mật khẩu</h2>
+      <p id="reset-target" class="muted"></p>
+      <input name="id" type="hidden">
+
+      <label>
+        Mật khẩu tạm mới
+        <input
+          type="password"
+          name="password"
+          required
+          minlength="10"
+          maxlength="128"
+          autocomplete="new-password"
+        >
+      </label>
+
+      <p class="muted">
+        Các phiên hiện tại bị thu hồi. Người dùng phải đổi mật khẩu sau khi đăng nhập lại.
+      </p>
+
+      <div class="dialog-actions">
+        <button type="button" class="secondary close-dialog">Hủy</button>
+        <button type="submit" class="primary">Đặt lại</button>
+      </div>
+    </form>
+  </dialog>
+</body>
+</html>

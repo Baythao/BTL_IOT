@@ -1,0 +1,11 @@
+user esp32-device
+topic write fire-demo/esp32-tang1/event
+topic write fire-demo/esp32-tang1/state
+topic write fire-demo/esp32-tang1/status
+topic read fire-demo/esp32-tang1/ack
+
+user firewatch-server
+topic read fire-demo/esp32-tang1/event
+topic read fire-demo/esp32-tang1/state
+topic read fire-demo/esp32-tang1/status
+topic write fire-demo/esp32-tang1/ack
